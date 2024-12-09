@@ -1,36 +1,13 @@
-provider "aws" {
-    region = "eu-west-2"
-}
-
 resource "aws_instance" "my_ec2" {
-    ami = "ami-0c76bd4bd302b30ec6"
-    instance_type = "t2.micro"
-    key_name = "project_1"
-    security_groups = "my_sg"
-    }
+  ami           = "ami-0c76bd4bd302b30ec"
+  instance_type = "t2.micro"
+  key_name      = "project_1"
+  for_each      = toset(["jenkins-master", "jenkins-slave", "ansible"])
 
+  vpc_security_group_ids = [aws_security_group.my_sg.id]
+  subnet_id              = aws_subnet.Nam-public-subnet-01.id
 
-resource "security_group" "my_sg" {
-    name = "my_sg"
-    ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    ingress {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-  
+  tags = {
+    Name = each.key
+  }
 }
